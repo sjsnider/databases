@@ -13,29 +13,37 @@ var Sequelize = require("sequelize");
 var sequelize = new Sequelize("chat", "root");
 
 var Users = sequelize.define('User', {
-  name: Sequelize.STRING,
+  name: {
+    type: Sequelize.STRING,
+    unique: true
+  }
 });
 
 var Rooms = sequelize.define('Room', {
-  name: Sequelize.STRING,
+  name: {
+    type: Sequelize.STRING,
+    unique: true
+  }
 });
 
 var Messages = sequelize.define('Message', {
   content: Sequelize.STRING,
-  user: {
-    type: Sequelize.INTEGER,
-    references: Users,
-    referencesKey: 'id',
-  },
-  room: {
-    type: Sequelize.INTEGER,
-    references: Rooms,
-    referencesKey: 'id',
-  }
+  // user: {
+  //   type: Sequelize.INTEGER,
+  //   // references: Users,
+  //   // referencesKey: 'id',
+  //   allowNull: false
+  // },
+  // room: {
+  //   type: Sequelize.INTEGER,
+  //   // references: Rooms,
+  //   // referencesKey: 'id',
+  //   // allowNull: false
+  // }
 });
 
-Users.hasMany(Messages);
-Rooms.hasMany(Messages);
+Users.hasOne(Messages, {foreignKey : 'UserId', foreignKeyConstraint: true});
+Rooms.hasOne(Messages, {foreignKey : 'RoomId', foreignKeyConstraint: true});
 Messages.belongsTo(Users);
 Messages.belongsTo(Rooms);
 
@@ -66,7 +74,7 @@ var handleRequest = function(request, response) {
       sendResponse(response,"Not Found",404);
     }else {
       Messages
-      .findAll()
+      .findAll({attributes: ['content'],include: [{model:Users, attributes: ['name'], required: true}]})
       .complete(function(err,messages){
         // console.log(messages);
         sendResponse(response,JSON.stringify(messages),200);
@@ -100,11 +108,14 @@ var handleRequest = function(request, response) {
       text = messageObj.text;
       console.log(userName);
       console.log(text);
+      Rooms.create({name:'lobby'}).complete(function(err,data){
+        if (err){}
+      });
       Users.create({name:userName}).complete(function(err,userData){
         if (err) {}
         Users.find({where: {name: userName}}).complete(function(err,userData){
           // console.log(userData.id);
-          Messages.create({content:text, user:userData.id}).complete(function(err,data){
+          Messages.create({content:text, UserId:userData.id, RoomId:1}).complete(function(err,data){
             // console.log(data);
           });
         });
