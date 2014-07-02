@@ -29,7 +29,7 @@ USE chat;
 -- ---
 
 DROP TABLE IF EXISTS `messages`;
-		
+
 CREATE TABLE `messages` (
   `ID` INTEGER(11) NOT NULL AUTO_INCREMENT,
   `content` VARCHAR(1000) NULL DEFAULT NULL,
@@ -40,24 +40,24 @@ CREATE TABLE `messages` (
 
 -- ---
 -- Table 'users'
--- 
+--
 -- ---
 
 DROP TABLE IF EXISTS `users`;
-		
+
 CREATE TABLE `users` (
   `ID` INTEGER(11) NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(50) NOT NULL,
+  `name` VARCHAR(50) NOT NULL UNIQUE,
   PRIMARY KEY (`ID`)
 );
 
 -- ---
 -- Table 'rooms'
--- 
+--
 -- ---
 
 DROP TABLE IF EXISTS `rooms`;
-		
+
 CREATE TABLE `rooms` (
   `ID` INTEGER(11) NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(50) NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE `rooms` (
 );
 
 -- ---
--- Foreign Keys 
+-- Foreign Keys
 -- ---
 
 ALTER TABLE `messages` ADD FOREIGN KEY (userID) REFERENCES `users` (`ID`);
